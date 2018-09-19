@@ -62,7 +62,7 @@ check_mount_point()
     echo "Remote backup machine not mounted!"
     mkdir -p "${MOUNT_POINT}"
     mount -t cifs \
-      -o "username=${AD_USER},password=${AD_PW},domain=${AD_DOMAIN},vers=3.0" \
+      -o "username=${AD_USER},password=${AD_PW},domain=${AD_DOMAIN},vers=${CIFS_VERSION}" \
       "//${AD_MACHINE}/data" \
       "${MOUNT_POINT}" \
       --verbose
