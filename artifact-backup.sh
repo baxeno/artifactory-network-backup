@@ -90,7 +90,7 @@ backup_newest_weekly()
   cd -
   cd "${FULL_SRC_DIR}"
   local_newest=$(find . -maxdepth 1 -type d -regextype sed -regex "${BACKUP_DIR_REGEX}" | sort -n -r | head -1)
-  if [ "${remote_newest}" -eq "${local_newest}.tar" ]; then
+  if [ "${remote_newest}" = "${local_newest}.tar" ]; then
     echo "Up-to-date backup"
     exit 0
   fi
