@@ -38,6 +38,7 @@ TEARDOWN()
 EXPECT_ZERO()
 {
   set +e
+  # shellcheck disable=SC2068
   $@
   local res=$?
   if [ $res -eq 0 ]; then
@@ -52,6 +53,7 @@ EXPECT_ZERO()
 EXPECT_NON_ZERO()
 {
   set +e
+  # shellcheck disable=SC2068
   $@
   local res=$?
   if [ $res -ne 0 ]; then
@@ -86,7 +88,7 @@ EXPECT_NOT_EXIST()
 CHECK_KERNEL_MODULE()
 {
   set +e
-  res=$(find /lib/modules/$(uname -r)/kernel | grep $1)
+  res=$(find "/lib/modules/$(uname -r)/kernel" | grep "$1")
   set -e
   if [ -n "${res}" ]; then
     echo "${TC}: KERNEL MODULE: OK"

@@ -83,7 +83,7 @@ backup_newest_weekly()
   local local_newest remote_newest tarfile
   cd "${FULL_DEST_DIR}"
   remote_newest=$(find . -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n -r | head -1)
-  if [ -n ${remote_newest} ] && [ ! -s "${remote_newest}" ]; then
+  if [ -n "${remote_newest}" ] && [ ! -s "${remote_newest}" ]; then
     echo "Remote tarball is zero bytes, removing it."
     rm -f "${remote_newest}"
   fi
@@ -104,7 +104,7 @@ backup_newest_weekly()
 cleanup_network_backups()
 {
   remote_count=$(find "${FULL_DEST_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | wc -l)
-  if [ -n ${remote_count} ] && [[ "${remote_count}" -gt ${BACKUP_COUNT} ]]; then
+  if [ -n "${remote_count}" ] && [[ "${remote_count}" -gt ${BACKUP_COUNT} ]]; then
     remote_oldest=$(find "${FULL_DEST_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n | head -1)
     echo "Removing oldest tarball backup - ${remote_oldest}"
     rm -f "${remote_oldest}"
@@ -126,7 +126,7 @@ if [ "$#" -eq 2 ]; then
   fi
 else
   if [ -s "${CFG_FILE}" ]; then
-    # shellcheck source=live-cfg.sh
+    # shellcheck source=template-cfg.sh
     source "${CFG_FILE}"
   else
     echo "Error: Unable to load configuration file - ${CFG_FILE}"
