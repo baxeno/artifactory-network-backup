@@ -9,7 +9,7 @@ before_install:
   - docker pull koalaman/shellcheck:v0.5.0
 
 script:
-  - docker run -v $(pwd):/scripts koalaman/shellcheck:v0.5.0 /scripts/artifact-backup.sh
+  - docker run --workdir=/scripts --volume $(pwd):/scripts koalaman/shellcheck:v0.5.0 -x /scripts/artifact-backup.sh
 
 matrix:
   fast_finish: true
