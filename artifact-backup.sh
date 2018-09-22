@@ -37,6 +37,7 @@ CFG_FILE="live-cfg.sh"
 TMP_DIR_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}\.tmp$'
 BACKUP_DIR_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}'
 BACKUP_FILE_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}\.tar'
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
 
 ################################################################################
@@ -118,16 +119,16 @@ cleanup_network_backups()
 if [ "$#" -eq 2 ]; then
   if [[ "$1" == "-test" ]]; then
     # shellcheck source=test/test-1-cfg.sh
-    source "test/test-$2-cfg.sh"
+    source "${SCRIPT_DIR}/test/test-$2-cfg.sh"
     TEST=1
   else
     echo "Usage: $0 -test <type>"
     exit 1
   fi
 else
-  if [ -s "${CFG_FILE}" ]; then
+  if [ -s "${SCRIPT_DIR}/${CFG_FILE}" ]; then
     # shellcheck source=template-cfg.sh
-    source "${CFG_FILE}"
+    source "${SCRIPT_DIR}/${CFG_FILE}"
   else
     echo "Error: Unable to load configuration file - ${CFG_FILE}"
     exit 1
