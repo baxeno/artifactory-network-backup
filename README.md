@@ -1,6 +1,6 @@
 # Artifactory CIFS/SMB network backup
 [![Build Status](https://travis-ci.org/baxeno/artifactory-network-backup.svg?branch=master)](https://travis-ci.org/baxeno/artifactory-network-backup)
-[![GitHub license](https://img.shields.io/github/license/baxeno/artifactory-network-backup.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
 
 Transfers Artifactory weekly backup from a Linux environment to a CIFS/SMB network share (Windows environment).
 The SMB/CIFS protocol is a standard file sharing protocol widely deployed on Microsoft Windows machines.
