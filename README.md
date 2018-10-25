@@ -76,6 +76,21 @@ Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`.
 
 > [crontab guru](https://crontab.guru/) - The quick and simple editor for cron schedule expressions by Cronitor.
 
-# Test
+# Development
+
+**Versioning:**
+
+- [Semantic Versioning 2.0.0](https://semver.org/)
+
+**Static code checker:**
+
+- [ShellCheck](https://github.com/koalaman/shellcheck) is running in pipeline.
+
+**Test:**
 
 You should be able to run `./run_test.sh` and validate that `artifact-backup.sh` is working on host machine without doing remote connections.
+
+**Interface:**
+
+- Backup directory format created by Artifactory - `YYYYMMDD.HHMMSS`
+- Variables in `template-cfg.sh`
