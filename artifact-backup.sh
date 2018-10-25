@@ -112,25 +112,43 @@ cleanup_network_backups()
   fi
 }
 
+app_usage()
+{
+  echo "${APP_NAME} v${APP_VERSION}"
+  echo "Development: ${APP_GITHUB}"
+  echo
+  echo "Usage: $0 --test <type>"
+}
+
 
 ################################################################################
 # Main
 
+# shellcheck source=common.sh
+source "${SCRIPT_DIR}/common.sh"
 if [ "$#" -eq 2 ]; then
-  if [[ "$1" == "-test" ]]; then
+  if [[ "$1" == "--test" ]]; then
     # shellcheck source=test/test-1-cfg.sh
     source "${SCRIPT_DIR}/test/test-$2-cfg.sh"
     TEST=1
   else
-    echo "Usage: $0 -test <type>"
+    app_usage
     exit 1
   fi
+elif [ "$#" -eq 1 ]; then
+  # -v --version -h --help
+  app_usage
+  exit 0
 else
   if [ -s "${SCRIPT_DIR}/${CFG_FILE}" ]; then
     # shellcheck source=template-cfg.sh
     source "${SCRIPT_DIR}/${CFG_FILE}"
   else
     echo "Error: Unable to load configuration file - ${CFG_FILE}"
+    echo
+    echo "Solution:"
+    echo "Step 1) cp template-cfg.sh ${CFG_FILE}"
+    echo "Step 2) Setup global variables so they match your Artifactory and network backup solution."
     exit 1
   fi
 fi

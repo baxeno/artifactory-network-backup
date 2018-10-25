@@ -111,19 +111,19 @@ TEARDOWN
 PRINT "Run test: Sunshine backup"
 INIT "Sunshine"
 PRINT "First weekly backup iteration"
-EXPECT_ZERO ./artifact-backup.sh -test 1
+EXPECT_ZERO ./artifact-backup.sh --test 1
 EXPECT_EXIST "${OUT}/20180908.020000.tar"
 EXPECT_NOT_EXIST "${OUT}/20180915.020000.tar"
 EXPECT_NOT_EXIST "${OUT}/20180922.020000.tar"
 
 PRINT "Second weekly backup iteration"
-EXPECT_ZERO ./artifact-backup.sh -test 2
+EXPECT_ZERO ./artifact-backup.sh --test 2
 EXPECT_EXIST "${OUT}/20180908.020000.tar"
 EXPECT_EXIST "${OUT}/20180915.020000.tar"
 EXPECT_NOT_EXIST "${OUT}/20180922.020000.tar"
 
 PRINT "Third weekly backup iteration"
-EXPECT_ZERO ./artifact-backup.sh -test 3
+EXPECT_ZERO ./artifact-backup.sh --test 3
 EXPECT_NOT_EXIST "${OUT}/20180908.020000.tar"
 EXPECT_EXIST "${OUT}/20180915.020000.tar"
 EXPECT_EXIST "${OUT}/20180922.020000.tar"
@@ -131,7 +131,7 @@ TEARDOWN
 
 PRINT "Run test: About network backup when Artifactory backup is ongoing"
 INIT "Ongoing"
-EXPECT_NON_ZERO ./artifact-backup.sh -test tmp
+EXPECT_NON_ZERO ./artifact-backup.sh --test tmp
 EXPECT_NOT_EXIST "${OUT}/20180808.020000.tmp.tar"
 TEARDOWN
 
