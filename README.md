@@ -121,8 +121,6 @@ The following items are considered interfaces of this component:
 
 You should be able to run `./run_test.sh` and validate that `artifact-backup.sh` is working on host machine without doing remote connections.
 
-TODO: #9 Run in Travis pipeline.
-
 **Documentation:**
 
 [Complete list of github markdown emoji markup](https://gist.github.com/rxaviers/7360908)
