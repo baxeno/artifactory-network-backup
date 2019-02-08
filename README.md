@@ -1,4 +1,5 @@
 # Artifactory CIFS/SMB network backup
+
 [![Build Status](https://travis-ci.org/baxeno/artifactory-network-backup.svg?branch=master)](https://travis-ci.org/baxeno/artifactory-network-backup)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
 
@@ -8,7 +9,7 @@ A weekly backup typically contain locally promoted artifacts and exclude cached 
 In case you need to maintain a code base for an extended period or backup size does not matter, just include all binary repositories.
 Artifactory can be configured to automatically cleanup old local backups.
 
-**Features:**
+**:star: Features :star:**
 
 - Tarball weekly backup. _(makes backup compatible with NTFS)_
 - Mount CIFS/SMB network share. _(does not use `/etc/fstab`)_
@@ -18,48 +19,63 @@ Artifactory can be configured to automatically cleanup old local backups.
 - Cleanup old network backups. _(avoid out-of-space on network share)_
 - Setup crontab.
 
-# Prerequisites
+## :factory: Deploy to production
+
+1. See _Prerequisites_ section.
+1. Clone this repository.
+1. Run test script, see _Test_ section.
+1. Create `live-cfg.sh`, see _Configuration paramters_ section.
+1. Schedule periodic run, see _Setting up cron job_ section
+
+## :frog: Prerequisites
 
 - JFrog Artifactory Pro instance (ex. docker-compose on Linux)
-- Weekly backup enabled (Admin -> Backup)
+- Weekly backup enabled in Artifactory (Admin -> Backup)
 - Host tools
   - Fedora: `sudo dnf install bash tar cifs-utils crontabs`
-- Kernel cifs driver.
+- Kernel cifs driver
 
-> Note: Artifactory OSS is also technically support but it does not support promotion.
+> :exclamation: Artifactory OSS is also technically supported but it does not support promotion.
+> :exclamation: When running Artifactory in docker you must volume mount backup directory to host.
 
-# Configurations
+## :vertical_traffic_light: Configuration parameters
 
 Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`.
 
-**AD_USER** - Active Directory username for CIFS/SMB network share.
-
-**AD_PW** - Active Directory password for CIFS/SMB network share.
-
-**AD_DOMAIN** - Active Directory domain name for CIFS/SMB network share.
-
-**AD_MACHINE** - Active Directory machine name for CIFS/SMB network share.
-
-**MOUNT_POINT** - Linux mount point for CIFS/SMB network share.
-
-**DEST_DIR** - Backup destination directory structure relative to MOUNT_POINT. Optional and may be left empty.
-
-**FULL_SRC_DIR** - Absolute path to Linux directory with Artifactory weekly backups.
-
-**CIFS_VERSION** - SMB protocol version (default=3.0). Allowed values are:
+- **AD_USER** - Active Directory username for CIFS/SMB network share.
+- **AD_PW** - Active Directory password for CIFS/SMB network share.
+- **AD_DOMAIN** - Active Directory domain name for CIFS/SMB network share.
+- **AD_MACHINE** - Active Directory machine name for CIFS/SMB network share.
+- **MOUNT_POINT** - Linux mount point for CIFS/SMB network share.
+- **DEST_DIR** - Backup destination directory structure relative to MOUNT_POINT. Optional and may be left empty.
+- **FULL_SRC_DIR** - Absolute path to Linux directory with Artifactory weekly backups.
+- **CIFS_VERSION** - SMB protocol version (default=3.0). Allowed values are:
   - 1.0 - The classic CIFS/SMBv1 protocol.
   - 2.0 - The SMBv2.002 protocol. This was initially introduced in Windows Vista Service Pack 1, and Windows Server 2008.
   Note that the initial release version of Windows Vista spoke a slightly different dialect (2.000) that is not supported.
   - 2.1 - The SMBv2.1 protocol that was introduced in Microsoft Windows 7 and Windows Server 2008R2.
   - 3.0 - The SMBv3.0 protocol that was introduced in Microsoft Windows 8 and Windows Server 2012.
   - 3.1.1 or 3.11 - The SMBv3.1.1 protocol that was introduced in Microsoft Windows Server 2016.
+- **BACKUP_COUNT** - How many network backups must be kept. (default 2)
 
-**BACKUP_COUNT** - How many network backups must be kept. (default 2)
+> :information_source: CIFS/SMB protocol information from `man mount.cifs`.
 
-> CIFS/SMB protocol information from `man mount.cifs`.
+## :clock6: Setting up cron job
 
-# Configure periodically run
+You should schedule a daily run of the script to ensure the latest weekly backup is copied to the network share.
+Choose a start time that don't collide with network share backup and machine maintenance window (patches are applied and rebooted).
+Call `sudo crontab -e` and use examples below as template.
 
+**Examples:**
+The following examples are running daily at 06:00 and this repository is cloned into `/home/artifactory-compose/devops`.
+
+_Run daily with log:_
+`0 6 * * * /home/artifactory-compose/devops/artifact-backup.sh >> /home/artifactory-compose/devops/log.txt 2>&1`
+
+_Run daily without log:_
+`0 6 * * * /home/artifactory-compose/devops/artifact-backup.sh > /dev/null 2>&1`
+
+> :information_source: It's possible to enable development debug in `artifact-backup.sh` by setting `set -x`.
 
 **Crontab syntax:**
 
@@ -74,11 +90,13 @@ Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`.
 +------------- min (0 - 59)
 ```
 
-> [crontab guru](https://crontab.guru/) - The quick and simple editor for cron schedule expressions by Cronitor.
+> :information_source: [crontab guru](https://crontab.guru/) - The quick and simple editor for cron schedule expressions by Cronitor.
 
-# Development
+## :construction: Development
 
 **Versioning:**
+
+Version is kept in [common.sh](common.sh).
 
 - [Semantic Versioning 2.0.0](https://semver.org/)
 
@@ -92,5 +110,13 @@ You should be able to run `./run_test.sh` and validate that `artifact-backup.sh`
 
 **Interface:**
 
+The following items are considered interfaces of this component:
+
 - Backup directory format created by Artifactory - `YYYYMMDD.HHMMSS`
 - Variables in `template-cfg.sh`
+
+> :warning: Major version must be bumped in case any changes breaks the interface.
+
+**Documentation:**
+
+[Complete list of github markdown emoji markup](https://gist.github.com/rxaviers/7360908)
