@@ -36,11 +36,12 @@ Artifactory can be configured to automatically cleanup old local backups.
 - Kernel cifs driver
 
 > :exclamation: Artifactory OSS is also technically supported but it does not support promotion.
+
 > :exclamation: When running Artifactory in docker you must volume mount backup directory to host.
 
 ## :vertical_traffic_light: Configuration parameters
 
-Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`.
+:point_right: Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`. :point_left:
 
 - **AD_USER** - Active Directory username for CIFS/SMB network share.
 - **AD_PW** - Active Directory password for CIFS/SMB network share.
@@ -56,9 +57,11 @@ Create a configuration file called `live-cfg.sh` based on `template-cfg.sh`.
   - 2.1 - The SMBv2.1 protocol that was introduced in Microsoft Windows 7 and Windows Server 2008R2.
   - 3.0 - The SMBv3.0 protocol that was introduced in Microsoft Windows 8 and Windows Server 2012.
   - 3.1.1 or 3.11 - The SMBv3.1.1 protocol that was introduced in Microsoft Windows Server 2016.
-- **BACKUP_COUNT** - How many network backups must be kept. (default 2)
+- **BACKUP_COUNT** - How many network backups must be kept. (default 2; minimum 1)
 
 > :information_source: CIFS/SMB protocol information from `man mount.cifs`.
+
+> :warning: Disk space peak usage: (`BACKUP_COUNT` + 1 ) * `backup size`.
 
 ## :clock6: Setting up cron job
 
@@ -67,13 +70,16 @@ Choose a start time that don't collide with network share backup and machine mai
 Call `sudo crontab -e` and use examples below as template.
 
 **Examples:**
-The following examples are running daily at 06:00 and this repository is cloned into `/home/artifactory-compose/devops`.
+
+The following examples are running daily at 06:00 and this repository `artifactory-network-backup` is cloned into `/home/devops/anb`.
 
 _Run daily with log:_
-`0 6 * * * /home/artifactory-compose/devops/artifact-backup.sh >> /home/artifactory-compose/devops/log.txt 2>&1`
+
+`0 6 * * * /home/devops/anb/artifact-backup.sh >> /home/devops/anb/log.txt 2>&1`
 
 _Run daily without log:_
-`0 6 * * * /home/artifactory-compose/devops/artifact-backup.sh > /dev/null 2>&1`
+
+`0 6 * * * /home/devops/anb/artifact-backup.sh > /dev/null 2>&1`
 
 > :information_source: It's possible to enable development debug in `artifact-backup.sh` by setting `set -x`.
 
@@ -94,11 +100,18 @@ _Run daily without log:_
 
 ## :construction: Development
 
-**Versioning:**
+All notable changes to this project will be documented in [CHANGELOG.md](CHANGELOG.md).
 
-Version is kept in [common.sh](common.sh).
+Version string is stored in [common.sh](common.sh).
 
-- [Semantic Versioning 2.0.0](https://semver.org/)
+**Interface:**
+
+The following items are considered interfaces of this component:
+
+- Backup directory format created by Artifactory - `YYYYMMDD.HHMMSS`
+- Variables in `template-cfg.sh`
+
+> :warning: Major version must be bumped in case any changes breaks the interface. :boom:
 
 **Static code checker:**
 
@@ -108,14 +121,7 @@ Version is kept in [common.sh](common.sh).
 
 You should be able to run `./run_test.sh` and validate that `artifact-backup.sh` is working on host machine without doing remote connections.
 
-**Interface:**
-
-The following items are considered interfaces of this component:
-
-- Backup directory format created by Artifactory - `YYYYMMDD.HHMMSS`
-- Variables in `template-cfg.sh`
-
-> :warning: Major version must be bumped in case any changes breaks the interface.
+TODO: #9 Run in Travis pipeline.
 
 **Documentation:**
 
