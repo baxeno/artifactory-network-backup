@@ -113,9 +113,10 @@ The following items are considered interfaces of this component:
 
 > :warning: Major version must be bumped in case any changes breaks the interface. :boom:
 
-**Static code checker:**
+**Travis pipeline:**
 
-- [ShellCheck](https://github.com/koalaman/shellcheck) is running in pipeline.
+- [ShellCheck](https://github.com/koalaman/shellcheck)
+- [Self test](run_test.sh)
 
 **Test:**
 
