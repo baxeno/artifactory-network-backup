@@ -58,9 +58,9 @@ check_config()
 check_mount_point()
 {
   local mounted
-  mounted=$(mount | grep "${MOUNT_POINT}")
+  mounted=$(mount | grep "${MOUNT_POINT}" || true)
   if [ -z "${mounted}" ]; then
-    echo "Remote backup machine not mounted!"
+    echo "Mounting remote backup machine!"
     mkdir -p "${MOUNT_POINT}"
     mount -t cifs \
       -o "username=${AD_USER},password=${AD_PW},domain=${AD_DOMAIN},vers=${CIFS_VERSION}" \
@@ -75,6 +75,8 @@ check_idle_artifactory()
   local unfinished
   unfinished=$(find "${FULL_SRC_DIR}" -maxdepth 1 -type d -regextype sed -regex "${TMP_DIR_REGEX}")
   if [ -n "${unfinished}" ]; then
+    # This indicates a new weekly backup is in progress and it isn't safe to proceed.
+    close_network
     exit 1
   fi
 }
@@ -93,6 +95,7 @@ backup_newest_weekly()
   local_newest=$(find . -maxdepth 1 -type d -regextype sed -regex "${BACKUP_DIR_REGEX}" | sort -n -r | head -1)
   if [ "${remote_newest}" = "${local_newest}.tar" ]; then
     echo "Up-to-date backup"
+    close_network
     exit 0
   fi
   tarfile="${FULL_DEST_DIR}/${local_newest}.tar"
@@ -109,6 +112,16 @@ cleanup_network_backups()
     remote_oldest=$(find "${FULL_DEST_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n | head -1)
     echo "Removing oldest tarball backup - ${remote_oldest}"
     rm -f "${remote_oldest}"
+  fi
+}
+
+close_network()
+{
+  local mounted
+  mounted=$(mount | grep "${MOUNT_POINT}" || true)
+  if [ -n "${mounted}" ]; then
+    echo "Unmounting remote backup machine!"
+    umount "${MOUNT_POINT}"
   fi
 }
 
@@ -161,5 +174,6 @@ fi
 check_idle_artifactory
 backup_newest_weekly
 cleanup_network_backups
+close_network
 
 exit 0
