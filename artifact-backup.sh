@@ -95,8 +95,7 @@ backup_newest_weekly()
   local_newest=$(find . -maxdepth 1 -type d -regextype sed -regex "${BACKUP_DIR_REGEX}" | sort -n -r | head -1)
   if [ "${remote_newest}" = "${local_newest}.tar" ]; then
     echo "Up-to-date backup"
-    close_network
-    exit 0
+    return
   fi
   tarfile="${FULL_DEST_DIR}/${local_newest}.tar"
   echo "Backup from: ${local_newest}"
