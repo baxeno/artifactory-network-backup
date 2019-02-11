@@ -3,11 +3,20 @@
 [![Build Status](https://travis-ci.org/baxeno/artifactory-network-backup.svg?branch=master)](https://travis-ci.org/baxeno/artifactory-network-backup)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
 
-Transfers Artifactory weekly backup from a Linux environment to a CIFS/SMB network share (Windows environment).
+This tool transfers JFrog Artifactory weekly backup from a Linux environment to a CIFS/SMB network share (Windows environment).
 The SMB/CIFS protocol is a standard file sharing protocol widely deployed on Microsoft Windows machines.
-A weekly backup typically contain locally promoted artifacts and exclude cached remote artifacts.
-In case you need to maintain a code base for an extended period or backup size does not matter, just include all binary repositories.
-Artifactory can be configured to automatically cleanup old local backups.
+Keeping a backup of all promoted and/or released artifacts are very useful in case you need to maintain a code base for an extended period of time even decades.
+Artifactory can be configured to automatically cleanup old local backups (daily and weekly) so this tools does not implement local cleanup but only remote cleanup.
+
+:heavy_plus_sign: Weekly backup typically include:
+
+- Promoted artifacts like Docker, Maven, NuGet, etc.
+- Manually published Maven artifacts using [maven-noci-publiser](https://github.com/baxeno/maven-noci-publisher) as it's a good generic binary container.
+
+:heavy_minus_sign: Weekly backup typically exclude:
+
+- Non-promoted builds like Maven SNAPSHOTs, etc.
+- Cached remote artifacts like RPM, Maven jcenter, etc.
 
 **:star: Features :star:**
 
