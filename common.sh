@@ -9,5 +9,5 @@
 # Constants
 
 APP_VERSION="0.1.0"
-APP_NAME="Artifactory CIFS/SMB network backup"
+APP_NAME="Transfers Artifactory weekly backup to a CIFS/SMB network share"
 APP_GITHUB="https://github.com/baxeno/artifactory-network-backup"
