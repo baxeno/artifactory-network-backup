@@ -125,12 +125,38 @@ close_network()
   fi
 }
 
-app_usage()
+show_app_usage()
+{
+  echo "Usage: ${0} [OPTION]"
+  echo "${APP_NAME}."
+  echo "Examples: ${0}"
+  echo "          ${0} &> log.txt"
+  echo
+  echo "Options:"
+  echo " -t, --test <CASE>    Run test case called <CASE>"
+  echo " -h, --help           This help text"
+  echo " -v, --version        Show version and development link"
+  echo
+}
+
+show_app_version()
 {
   echo "${APP_NAME} v${APP_VERSION}"
   echo "Development: ${APP_GITHUB}"
+}
+
+show_app_test_error()
+{
+  echo "Error: Unable to find test configuration file - ${1}"
+}
+
+show_app_error()
+{
+  echo "Error: Unable to find configuration file - ${CFG_FILE}"
   echo
-  echo "Usage: $0 --test <type>"
+  echo "Solution:"
+  echo "Step 1) cp template-cfg.sh ${CFG_FILE}"
+  echo "Step 2) Setup global variables so they match your Artifactory and network backup solution."
 }
 
 
@@ -139,35 +165,51 @@ app_usage()
 
 # shellcheck source=common.sh
 source "${SCRIPT_DIR}/common.sh"
-if [ "$#" -eq 2 ]; then
-  if [[ "$1" == "--test" ]]; then
-    # shellcheck source=test/test-1-cfg.sh
-    source "${SCRIPT_DIR}/test/test-$2-cfg.sh"
-    TEST=1
-  else
-    app_usage
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+  "-t" | "--test")
+    if [[ "$#" -gt 1 ]]; then
+      test_cfg="${SCRIPT_DIR}/test/test-$2-cfg.sh"
+      if [ -s "${test_cfg}" ]; then
+        # shellcheck source=test/test-1-cfg.sh
+        source "${test_cfg}"
+        FULL_DEST_DIR="${MOUNT_POINT}/${DEST_DIR}"
+        TEST=1
+        shift; shift
+      else
+        show_app_test_error "${test_cfg}"
+        exit 1
+      fi
+    else
+      show_app_usage
+      exit 1
+    fi
+    ;;
+  "-h" | "--help")
+    show_app_usage
+    exit 0
+    ;;
+  "-v" | "--version")
+    show_app_version
+    exit 0
+    ;;
+  *)
+    echo "Unknown parameter passed: $1"
     exit 1
-  fi
-elif [ "$#" -eq 1 ]; then
-  # -v --version -h --help
-  app_usage
-  exit 0
-else
+    ;;
+  esac
+done
+
+
+if [ ${TEST} -eq 0 ]; then
   if [ -s "${SCRIPT_DIR}/${CFG_FILE}" ]; then
     # shellcheck source=template-cfg.sh
     source "${SCRIPT_DIR}/${CFG_FILE}"
+    FULL_DEST_DIR="${MOUNT_POINT}/${DEST_DIR}"
   else
-    echo "Error: Unable to load configuration file - ${CFG_FILE}"
-    echo
-    echo "Solution:"
-    echo "Step 1) cp template-cfg.sh ${CFG_FILE}"
-    echo "Step 2) Setup global variables so they match your Artifactory and network backup solution."
+    show_app_error
     exit 1
   fi
-fi
-FULL_DEST_DIR="${MOUNT_POINT}/${DEST_DIR}"
-
-if [ ${TEST} -eq 0 ]; then
   check_config
   check_mount_point
 fi
