@@ -11,69 +11,23 @@ set -e # Exit script when a statement returns a non-true value
 
 
 ################################################################################
-# Global variables (most are loaded from CFG_FILE)
-#
-# TEST - Test mode [0: disabled, 1: enabled].
-# BACKUP_COUNT - Number of weekly artifactory backups that are kept.
-# CIFS_VERSION - Protocol version (3.0 = Windows Server 2012).
-# CFG_FILE - Configuration file which makes updating this file from git easier.
-# AD_USER - Active Directory username for Windows network share.
-# AD_PW - Active Directory password for Windows network share.
-# AD_DOMAIN - Active Directory domain name for Windows network share.
-# AD_MACHINE - Active Directory machine name for Windows network share.
-# MOUNT_POINT - Linux mount point for Windows network share.
-# DEST_DIR - Backup destination directory structure relative to MOUNT_POINT.
-# FULL_SRC_DIR - Absolute path to Linux directory with Artifactory weekly backups.
-
-TEST=0
-BACKUP_COUNT=2
-CIFS_VERSION="3.0"
-CFG_FILE="live-cfg.sh"
+# Configuration variables are loaded from CFG_FILE.
 
 
 ################################################################################
 # Constants
 
-TMP_DIR_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}\.tmp$'
-BACKUP_DIR_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}'
-BACKUP_FILE_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}\.tar'
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+CFG_FILE="live-cfg.sh"
 
 
 ################################################################################
 # Functions
 
-check_config()
-{
-  if [ -z "${AD_USER}" ] || [ -z "${AD_PW}" ] || [ -z "${AD_DOMAIN}" ] || [ -z "${AD_MACHINE}" ]; then
-    echo "ERROR! Active Directory (AD) credentials or domain joined machine missing!"
-    exit 1
-  fi
-  if [ -z "${MOUNT_POINT}" ] || [ -z "${FULL_SRC_DIR}" ]; then
-    echo "ERROR! Mount point or Artifactory backup location missing!"
-    exit 1
-  fi
-}
-
-check_mount_point()
-{
-  local mounted
-  mounted=$(mount | grep "${MOUNT_POINT}" || true)
-  if [ -z "${mounted}" ]; then
-    echo "Mounting remote backup machine!"
-    mkdir -p "${MOUNT_POINT}"
-    mount -t cifs \
-      -o "username=${AD_USER},password=${AD_PW},domain=${AD_DOMAIN},vers=${CIFS_VERSION}" \
-      "//${AD_MACHINE}/data" \
-      "${MOUNT_POINT}" \
-      --verbose
-  fi
-}
-
 check_idle_artifactory()
 {
   local unfinished
-  unfinished=$(find "${FULL_SRC_DIR}" -maxdepth 1 -type d -regextype sed -regex "${TMP_DIR_REGEX}")
+  unfinished=$(find "${FULL_LOCAL_DIR}" -maxdepth 1 -type d -regextype sed -regex "${TMP_DIR_REGEX}")
   if [ -n "${unfinished}" ]; then
     # This indicates a new weekly backup is in progress and it isn't safe to proceed.
     close_network
@@ -84,7 +38,7 @@ check_idle_artifactory()
 backup_newest_weekly()
 {
   local local_newest remote_newest tarfile
-  cd "${FULL_DEST_DIR}"
+  cd "${FULL_REMOTE_DIR}"
   remote_newest=$(find . -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n -r | head -1)
   if [ -n "${remote_newest}" ] && [ ! -s "${remote_newest}" ]; then
     echo "Remote tarball is zero bytes, removing it."
@@ -97,7 +51,7 @@ backup_newest_weekly()
     echo "Up-to-date backup"
     return
   fi
-  tarfile="${FULL_DEST_DIR}/${local_newest}.tar"
+  tarfile="${FULL_REMOTE_DIR}/${local_newest}.tar"
   echo "Backup from: ${local_newest}"
   echo "Backup to: ${tarfile}"
   tar -cf "${tarfile}" "${local_newest}"
@@ -106,9 +60,9 @@ backup_newest_weekly()
 
 cleanup_network_backups()
 {
-  remote_count=$(find "${FULL_DEST_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | wc -l)
+  remote_count=$(find "${FULL_REMOTE_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | wc -l)
   if [ -n "${remote_count}" ] && [[ "${remote_count}" -gt ${BACKUP_COUNT} ]]; then
-    remote_oldest=$(find "${FULL_DEST_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n | head -1)
+    remote_oldest=$(find "${FULL_REMOTE_DIR}" -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n | head -1)
     echo "Removing oldest tarball backup - ${remote_oldest}"
     rm -f "${remote_oldest}"
   fi
@@ -138,17 +92,6 @@ show_app_usage()
   echo
 }
 
-show_app_version()
-{
-  echo "${APP_NAME} v${APP_VERSION}"
-  echo "Development: ${APP_GITHUB}"
-}
-
-show_app_test_error()
-{
-  echo "Error: Unable to find test configuration file - ${1}"
-}
-
 show_app_error()
 {
   echo "Error: Unable to find configuration file - ${CFG_FILE}"
@@ -164,6 +107,7 @@ show_app_error()
 
 # shellcheck source=common.sh
 source "${SCRIPT_DIR}/common.sh"
+TEST=0
 while [[ "$#" -gt 0 ]]; do
   case $1 in
   "-t" | "--test")
@@ -172,7 +116,7 @@ while [[ "$#" -gt 0 ]]; do
       if [ -s "${test_cfg}" ]; then
         # shellcheck source=test/test-1-cfg.sh
         source "${test_cfg}"
-        FULL_DEST_DIR="${MOUNT_POINT}/${DEST_DIR}"
+        FULL_REMOTE_DIR="${MOUNT_POINT}/${DEST_DIR}"
         TEST=1
         shift; shift
       else
@@ -204,7 +148,7 @@ if [ ${TEST} -eq 0 ]; then
   if [ -s "${SCRIPT_DIR}/${CFG_FILE}" ]; then
     # shellcheck source=template-cfg.sh
     source "${SCRIPT_DIR}/${CFG_FILE}"
-    FULL_DEST_DIR="${MOUNT_POINT}/${DEST_DIR}"
+    FULL_REMOTE_DIR="${MOUNT_POINT}/${REMOTE_DIR}"
   else
     show_app_error
     exit 1
