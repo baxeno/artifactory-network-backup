@@ -23,16 +23,17 @@ PRINT()
 INIT()
 {
   TC="$1"
-  echo "${TC}: Init test case"
+  echo "--- ${TC}: Init test case ---"
   rm -rf "${OUT}"
   mkdir "${OUT}"
 }
 
 TEARDOWN()
 {
-  echo "${TC}: Completed test case"
+  echo "--- ${TC}: Completed test case ---"
   rm -rf "${OUT}"
   TC=""
+  echo
 }
 
 EXPECT_ZERO()
@@ -106,6 +107,23 @@ PRINT "Running all tests"
 PRINT "Run test: Kernel module fs/cifs present"
 INIT "Kernel module"
 CHECK_KERNEL_MODULE "fs/cifs"
+TEARDOWN
+
+PRINT "Run test: Arguments for artifact backup script."
+INIT "Help menu"
+EXPECT_ZERO ./artifact-backup.sh -h
+EXPECT_ZERO ./artifact-backup.sh --help
+EXPECT_ZERO ./artifact-backup.sh --help me
+TEARDOWN
+INIT "Version menu"
+EXPECT_ZERO ./artifact-backup.sh -v
+EXPECT_ZERO ./artifact-backup.sh --version
+EXPECT_ZERO ./artifact-backup.sh --version now
+TEARDOWN
+INIT "Test menu"
+EXPECT_NON_ZERO ./artifact-backup.sh -t
+EXPECT_NON_ZERO ./artifact-backup.sh --test
+EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
 TEARDOWN
 
 PRINT "Run test: Sunshine backup"

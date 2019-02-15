@@ -45,15 +45,15 @@ backup_newest_weekly()
     rm -f "${remote_newest}"
   fi
   cd -
-  cd "${FULL_SRC_DIR}"
+  cd "${FULL_LOCAL_DIR}"
   local_newest=$(find . -maxdepth 1 -type d -regextype sed -regex "${BACKUP_DIR_REGEX}" | sort -n -r | head -1)
   if [ "${remote_newest}" = "${local_newest}.tar" ]; then
     echo "Up-to-date backup"
     return
   fi
   tarfile="${FULL_REMOTE_DIR}/${local_newest}.tar"
-  echo "Backup from: ${local_newest}"
-  echo "Backup to: ${tarfile}"
+  echo "Backup from (local): ${local_newest}"
+  echo "Backup to (remote): ${tarfile}"
   tar -cf "${tarfile}" "${local_newest}"
   cd -
 }
@@ -111,12 +111,12 @@ TEST=0
 while [[ "$#" -gt 0 ]]; do
   case $1 in
   "-t" | "--test")
-    if [[ "$#" -gt 1 ]]; then
+    if [[ "$#" -eq 2 ]]; then
       test_cfg="${SCRIPT_DIR}/test/test-$2-cfg.sh"
       if [ -s "${test_cfg}" ]; then
         # shellcheck source=test/test-1-cfg.sh
         source "${test_cfg}"
-        FULL_REMOTE_DIR="${MOUNT_POINT}/${DEST_DIR}"
+        FULL_REMOTE_DIR="${MOUNT_POINT}/${REMOTE_DIR}"
         TEST=1
         shift; shift
       else
