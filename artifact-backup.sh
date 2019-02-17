@@ -19,6 +19,7 @@ set -e # Exit script when a statement returns a non-true value
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 CFG_FILE="live-cfg.sh"
+DIRECTION="to"
 
 
 ################################################################################
@@ -76,29 +77,6 @@ close_network()
     echo "Unmounting remote backup machine!"
     umount "${MOUNT_POINT}"
   fi
-}
-
-show_app_usage()
-{
-  echo "Usage: ${0} [OPTION]"
-  echo "${APP_NAME}."
-  echo "Examples: ${0}"
-  echo "          ${0} &> log.txt"
-  echo
-  echo "Options:"
-  echo " -t, --test <CASE>    Run test case called <CASE>"
-  echo " -h, --help           This help text"
-  echo " -v, --version        Show version and development link"
-  echo
-}
-
-show_app_error()
-{
-  echo "Error: Unable to find configuration file - ${CFG_FILE}"
-  echo
-  echo "Solution:"
-  echo "Step 1) cp template-cfg.sh ${CFG_FILE}"
-  echo "Step 2) Setup global variables so they match your Artifactory and network backup solution."
 }
 
 

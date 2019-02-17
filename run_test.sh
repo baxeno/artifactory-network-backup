@@ -4,7 +4,7 @@ set -u # Exit script when using an uninitialised variable
 set -e # Exit script when a statement returns a non-true value
 #set -x # Debug during development
 
-OUT="test/output"
+REMOTE="test/remote"
 TC=""
 
 
@@ -24,14 +24,14 @@ INIT()
 {
   TC="$1"
   echo "--- ${TC}: Init test case ---"
-  rm -rf "${OUT}"
-  mkdir "${OUT}"
+  rm -rf "${REMOTE}"
+  mkdir "${REMOTE}"
 }
 
 TEARDOWN()
 {
   echo "--- ${TC}: Completed test case ---"
-  rm -rf "${OUT}"
+  rm -rf "${REMOTE}"
   TC=""
   echo
 }
@@ -126,31 +126,58 @@ EXPECT_NON_ZERO ./artifact-backup.sh --test
 EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
 TEARDOWN
 
+PRINT "Run test: Arguments for artifact restore script."
+INIT "Help menu"
+EXPECT_ZERO ./artifact-backup.sh -h
+EXPECT_ZERO ./artifact-backup.sh --help
+EXPECT_ZERO ./artifact-backup.sh --help me
+TEARDOWN
+INIT "Version menu"
+EXPECT_ZERO ./artifact-backup.sh -v
+EXPECT_ZERO ./artifact-backup.sh --version
+EXPECT_ZERO ./artifact-backup.sh --version now
+TEARDOWN
+INIT "Test menu"
+EXPECT_NON_ZERO ./artifact-backup.sh -t
+EXPECT_NON_ZERO ./artifact-backup.sh --test
+EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
+TEARDOWN
+
 PRINT "Run test: Sunshine backup"
 INIT "Sunshine"
 PRINT "First weekly backup iteration"
 EXPECT_ZERO ./artifact-backup.sh --test 1
-EXPECT_EXIST "${OUT}/20180908.020000.tar"
-EXPECT_NOT_EXIST "${OUT}/20180915.020000.tar"
-EXPECT_NOT_EXIST "${OUT}/20180922.020000.tar"
+EXPECT_EXIST "${REMOTE}/20180908.020000.tar"
+EXPECT_NOT_EXIST "${REMOTE}/20180915.020000.tar"
+EXPECT_NOT_EXIST "${REMOTE}/20180922.020000.tar"
 
 PRINT "Second weekly backup iteration"
 EXPECT_ZERO ./artifact-backup.sh --test 2
-EXPECT_EXIST "${OUT}/20180908.020000.tar"
-EXPECT_EXIST "${OUT}/20180915.020000.tar"
-EXPECT_NOT_EXIST "${OUT}/20180922.020000.tar"
+EXPECT_EXIST "${REMOTE}/20180908.020000.tar"
+EXPECT_EXIST "${REMOTE}/20180915.020000.tar"
+EXPECT_NOT_EXIST "${REMOTE}/20180922.020000.tar"
 
 PRINT "Third weekly backup iteration"
 EXPECT_ZERO ./artifact-backup.sh --test 3
-EXPECT_NOT_EXIST "${OUT}/20180908.020000.tar"
-EXPECT_EXIST "${OUT}/20180915.020000.tar"
-EXPECT_EXIST "${OUT}/20180922.020000.tar"
+EXPECT_NOT_EXIST "${REMOTE}/20180908.020000.tar"
+EXPECT_EXIST "${REMOTE}/20180915.020000.tar"
+EXPECT_EXIST "${REMOTE}/20180922.020000.tar"
 TEARDOWN
 
-PRINT "Run test: About network backup when Artifactory backup is ongoing"
+PRINT "Run test: Abort network backup when Artifactory backup is ongoing"
 INIT "Ongoing"
 EXPECT_NON_ZERO ./artifact-backup.sh --test tmp
-EXPECT_NOT_EXIST "${OUT}/20180808.020000.tmp.tar"
+EXPECT_NOT_EXIST "${REMOTE}/20180808.020000.tmp.tar"
+TEARDOWN
+
+PRINT "Run test: Restore newest network backup"
+INIT "Sunshine"
+#EXPECT_ZERO ./artifact-restore.sh
+TEARDOWN
+
+PRINT "Run test: Abort network backup restore"
+#EXPECT_NON_ZERO ./artifact-restore.sh
+INIT "Local edition present"
 TEARDOWN
 
 PRINT "All tests completed"

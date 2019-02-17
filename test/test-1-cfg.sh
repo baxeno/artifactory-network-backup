@@ -23,5 +23,5 @@ AD_MACHINE=""
 # FULL_LOCAL_DIR - Absolute path to Linux directory with Artifactory weekly backups.
 
 MOUNT_POINT="${PWD}/test"
-REMOTE_DIR="output"
+REMOTE_DIR="remote"
 FULL_LOCAL_DIR="${MOUNT_POINT}/input-1"
