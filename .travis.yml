@@ -10,6 +10,7 @@ before_install:
 
 script:
   - docker run --workdir=/scripts --volume $(pwd):/scripts koalaman/shellcheck:v0.6.0 -a -x /scripts/artifact-backup.sh
+  - docker run --workdir=/scripts --volume $(pwd):/scripts koalaman/shellcheck:v0.6.0 -x /scripts/artifact-restore.sh
   - docker run --workdir=/scripts --volume $(pwd):/scripts koalaman/shellcheck:v0.6.0 -a -x /scripts/run_test.sh
   - ./run_test.sh
 
