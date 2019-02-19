@@ -30,7 +30,7 @@ check_idle_artifactory()
   local unfinished
   unfinished=$(find "${FULL_LOCAL_DIR}" -maxdepth 1 -type d -regextype sed -regex "${TMP_DIR_REGEX}")
   if [ -n "${unfinished}" ]; then
-    # This indicates a new weekly backup is in progress and it isn't safe to proceed.
+    echo "New weekly backup is in progress and it isn't safe to proceed."
     close_network
     exit 1
   fi
@@ -53,8 +53,9 @@ backup_newest_weekly()
     return
   fi
   tarfile="${FULL_REMOTE_DIR}/${local_newest}.tar"
-  echo "Backup from (local): ${local_newest}"
-  echo "Backup to (remote): ${tarfile}"
+  echo "Backup needs to be transferred."
+  echo "  local: ${local_newest}"
+  echo "  remote: ${tarfile}"
   tar -cf "${tarfile}" "${local_newest}"
   cd -
 }

@@ -157,8 +157,8 @@ EXPECT_NON_ZERO ./artifact-backup.sh --test
 EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
 TEARDOWN_BACKUP
 
-PRINT "Run test: Sunshine backup"
-INIT_BACKUP "Sunshine"
+PRINT "Run test: Sunshine backup. Expect: Remove oldest backup on 3rd iteration."
+INIT_BACKUP "Sunshine backup"
 PRINT "First weekly backup iteration"
 EXPECT_ZERO ./artifact-backup.sh --test 1
 EXPECT_EXIST "${REMOTE}/20180908.020000.tar"
@@ -178,7 +178,7 @@ EXPECT_EXIST "${REMOTE}/20180915.020000.tar"
 EXPECT_EXIST "${REMOTE}/20180922.020000.tar"
 TEARDOWN_BACKUP
 
-PRINT "Run test: Abort network backup when Artifactory backup is ongoing"
+PRINT "Run test: Abort network backup when Artifactory backup is ongoing. Expect: New weekly backup is in progress and it isn't safe to proceed."
 INIT_BACKUP "Ongoing"
 EXPECT_NON_ZERO ./artifact-backup.sh --test tmp
 EXPECT_NOT_EXIST "${REMOTE}/20180808.020000.tmp.tar"
