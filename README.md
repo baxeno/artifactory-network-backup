@@ -59,14 +59,14 @@ Artifactory can be configured to automatically cleanup old local backups (daily 
 - **MOUNT_POINT** - Linux mount point for CIFS/SMB network share.
 - **DEST_DIR** - Backup destination directory structure relative to MOUNT_POINT. Optional and may be left empty.
 - **FULL_SRC_DIR** - Absolute path to Linux directory with Artifactory weekly backups.
-- **CIFS_VERSION** - SMB protocol version (default=3.0). Allowed values are:
+- **CIFS_VERSION** - SMB protocol version. Allowed values are [default 3.0]:
   - 1.0 - The classic CIFS/SMBv1 protocol.
   - 2.0 - The SMBv2.002 protocol. This was initially introduced in Windows Vista Service Pack 1, and Windows Server 2008.
   Note that the initial release version of Windows Vista spoke a slightly different dialect (2.000) that is not supported.
   - 2.1 - The SMBv2.1 protocol that was introduced in Microsoft Windows 7 and Windows Server 2008R2.
   - 3.0 - The SMBv3.0 protocol that was introduced in Microsoft Windows 8 and Windows Server 2012.
   - 3.1.1 or 3.11 - The SMBv3.1.1 protocol that was introduced in Microsoft Windows Server 2016.
-- **BACKUP_COUNT** - How many network backups must be kept. (default 2; minimum 1)
+- **BACKUP_COUNT** - How many network backups must be kept. [default 2; minimum 1]
 
 > :information_source: CIFS/SMB protocol information from `man mount.cifs`.
 

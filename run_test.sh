@@ -5,6 +5,8 @@ set -e # Exit script when a statement returns a non-true value
 #set -x # Debug during development
 
 REMOTE="test/remote"
+LOCAL="test/local"
+RESTORE_REMOTE="test/input-restore"
 TC=""
 
 
@@ -20,18 +22,32 @@ PRINT()
   fi
 }
 
-INIT()
+INIT_BACKUP()
 {
   TC="$1"
   echo "--- ${TC}: Init test case ---"
-  rm -rf "${REMOTE}"
-  mkdir "${REMOTE}"
+  mkdir -p "${REMOTE}"
 }
 
-TEARDOWN()
+TEARDOWN_BACKUP()
 {
   echo "--- ${TC}: Completed test case ---"
   rm -rf "${REMOTE}"
+  TC=""
+  echo
+}
+
+INIT_RESTORE()
+{
+  TC="$1"
+  echo "--- ${TC}: Init test case ---"
+  mkdir -p "${LOCAL}"
+}
+
+TEARDOWN_RESTORE()
+{
+  echo "--- ${TC}: Completed test case ---"
+  rm -rf "${LOCAL}"
   TC=""
   echo
 }
@@ -105,46 +121,44 @@ CHECK_KERNEL_MODULE()
 PRINT "Running all tests"
 
 PRINT "Run test: Kernel module fs/cifs present"
-INIT "Kernel module"
 CHECK_KERNEL_MODULE "fs/cifs"
-TEARDOWN
 
 PRINT "Run test: Arguments for artifact backup script."
-INIT "Help menu"
+INIT_BACKUP "Help menu"
 EXPECT_ZERO ./artifact-backup.sh -h
 EXPECT_ZERO ./artifact-backup.sh --help
 EXPECT_ZERO ./artifact-backup.sh --help me
-TEARDOWN
-INIT "Version menu"
+TEARDOWN_BACKUP
+INIT_BACKUP "Version menu"
 EXPECT_ZERO ./artifact-backup.sh -v
 EXPECT_ZERO ./artifact-backup.sh --version
 EXPECT_ZERO ./artifact-backup.sh --version now
-TEARDOWN
-INIT "Test menu"
+TEARDOWN_BACKUP
+INIT_BACKUP "Test menu"
 EXPECT_NON_ZERO ./artifact-backup.sh -t
 EXPECT_NON_ZERO ./artifact-backup.sh --test
 EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
-TEARDOWN
+TEARDOWN_BACKUP
 
 PRINT "Run test: Arguments for artifact restore script."
-INIT "Help menu"
+INIT_BACKUP "Help menu"
 EXPECT_ZERO ./artifact-backup.sh -h
 EXPECT_ZERO ./artifact-backup.sh --help
 EXPECT_ZERO ./artifact-backup.sh --help me
-TEARDOWN
-INIT "Version menu"
+TEARDOWN_BACKUP
+INIT_BACKUP "Version menu"
 EXPECT_ZERO ./artifact-backup.sh -v
 EXPECT_ZERO ./artifact-backup.sh --version
 EXPECT_ZERO ./artifact-backup.sh --version now
-TEARDOWN
-INIT "Test menu"
+TEARDOWN_BACKUP
+INIT_BACKUP "Test menu"
 EXPECT_NON_ZERO ./artifact-backup.sh -t
 EXPECT_NON_ZERO ./artifact-backup.sh --test
 EXPECT_NON_ZERO ./artifact-backup.sh --test invalid argument
-TEARDOWN
+TEARDOWN_BACKUP
 
 PRINT "Run test: Sunshine backup"
-INIT "Sunshine"
+INIT_BACKUP "Sunshine"
 PRINT "First weekly backup iteration"
 EXPECT_ZERO ./artifact-backup.sh --test 1
 EXPECT_EXIST "${REMOTE}/20180908.020000.tar"
@@ -162,23 +176,44 @@ EXPECT_ZERO ./artifact-backup.sh --test 3
 EXPECT_NOT_EXIST "${REMOTE}/20180908.020000.tar"
 EXPECT_EXIST "${REMOTE}/20180915.020000.tar"
 EXPECT_EXIST "${REMOTE}/20180922.020000.tar"
-TEARDOWN
+TEARDOWN_BACKUP
 
 PRINT "Run test: Abort network backup when Artifactory backup is ongoing"
-INIT "Ongoing"
+INIT_BACKUP "Ongoing"
 EXPECT_NON_ZERO ./artifact-backup.sh --test tmp
 EXPECT_NOT_EXIST "${REMOTE}/20180808.020000.tmp.tar"
-TEARDOWN
+TEARDOWN_BACKUP
 
-PRINT "Run test: Restore newest network backup"
-INIT "Sunshine"
-#EXPECT_ZERO ./artifact-restore.sh
-TEARDOWN
+PRINT "Run test: Restore newest network backup. Expect: Backup needs to be restored."
+INIT_RESTORE "Sunshine backup restore"
+# Remote directory contain 2 backups
+EXPECT_EXIST "${RESTORE_REMOTE}/20180915.020000.tar"
+EXPECT_EXIST "${RESTORE_REMOTE}/20180922.020000.tar"
+EXPECT_ZERO ./artifact-restore.sh --test restore
+# Remote directory still contain 2 backups as they are left intact.
+EXPECT_EXIST "${RESTORE_REMOTE}/20180915.020000.tar"
+EXPECT_EXIST "${RESTORE_REMOTE}/20180922.020000.tar"
+# Backups are not just copied to local directory.
+EXPECT_NOT_EXIST "${LOCAL}/20180915.020000.tar"
+EXPECT_NOT_EXIST "${LOCAL}/20180922.020000.tar"
+# Correct backup tarball is extracted to local directory.
+EXPECT_NOT_EXIST "${LOCAL}/20180915.020000"
+EXPECT_EXIST "${LOCAL}/20180922.020000"
+TC=""; echo # TEARDOWN_RESTORE # We want to reuse remote directory content in next test.
 
-PRINT "Run test: Abort network backup restore"
-#EXPECT_NON_ZERO ./artifact-restore.sh
-INIT "Local edition present"
-TEARDOWN
+PRINT "Run test: Abort network backup restore. Expect: Local backup is up-to-date."
+INIT_RESTORE "Abort backup restore"
+# Newest backup is already extracted in local directory.
+EXPECT_EXIST "${LOCAL}/20180922.020000"
+# Remote directory contain 2 backups
+EXPECT_EXIST "${RESTORE_REMOTE}/20180915.020000.tar"
+EXPECT_EXIST "${RESTORE_REMOTE}/20180922.020000.tar"
+# Run restore script
+EXPECT_ZERO ./artifact-restore.sh --test restore
+# Newest backup is local directory is left intact.
+EXPECT_NOT_EXIST "${LOCAL}/20180915.020000"
+EXPECT_EXIST "${LOCAL}/20180922.020000"
+TEARDOWN_RESTORE
 
 PRINT "All tests completed"
 exit 0

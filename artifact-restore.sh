@@ -25,6 +25,27 @@ DIRECTION="from"
 ################################################################################
 # Functions
 
+restore_newest_weekly()
+{
+  local local_newest remote_newest
+  cd "${FULL_REMOTE_DIR}"
+  remote_newest=$(find . -maxdepth 1 -type f -regextype sed -regex "${BACKUP_FILE_REGEX}" | sort -n -r | head -1)
+  if [ -n "${remote_newest}" ] && [ ! -s "${remote_newest}" ]; then
+    echo "Remote tarball is zero bytes, unable to use it."
+    exit 1
+  fi
+  cd -
+  cd "${FULL_LOCAL_DIR}"
+  local_newest=$(find . -maxdepth 1 -type d -regextype sed -regex "${BACKUP_DIR_REGEX}" | sort -n -r | head -1)
+  if [ "${remote_newest}" = "${local_newest}.tar" ]; then
+    echo "Local backup is up-to-date."
+    exit 0
+  fi
+  echo "Backup needs to be restored."
+  echo "  remote: ${FULL_REMOTE_DIR}/${remote_newest}"
+  echo "  local: ${FULL_LOCAL_DIR}"
+  tar -xf "${FULL_REMOTE_DIR}/${remote_newest}"
+}
 
 ################################################################################
 # Main
@@ -41,7 +62,7 @@ while [[ "$#" -gt 0 ]]; do
       if [ -s "${test_cfg}" ]; then
         # shellcheck source=test/test-restore-cfg.sh
         source "${test_cfg}"
-        FULL_REMOTE_DIR="${MOUNT_POINT}/${DEST_DIR}"
+        FULL_REMOTE_DIR="${MOUNT_POINT}/${REMOTE_DIR}"
         TEST=1
         shift; shift
       else
@@ -81,6 +102,5 @@ if [ ${TEST} -eq 0 ]; then
   check_mount_point
 fi
 restore_newest_weekly
-close_network
 
 exit 0
