@@ -1,6 +1,7 @@
 # Artifactory CIFS/SMB network backup
 
 [![Build Status](https://travis-ci.org/baxeno/artifactory-network-backup.svg?branch=master)](https://travis-ci.org/baxeno/artifactory-network-backup)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
 
 This tool transfers JFrog Artifactory weekly backup from a Linux environment to a CIFS/SMB network share (Windows environment).
@@ -108,6 +109,8 @@ _Run daily without log:_
 > :information_source: [crontab guru](https://crontab.guru/) - The quick and simple editor for cron schedule expressions by Cronitor.
 
 ## :construction: Development
+
+What to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 All notable changes to this project will be documented in [CHANGELOG.md](CHANGELOG.md).
 
