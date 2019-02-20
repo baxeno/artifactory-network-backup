@@ -1,6 +1,7 @@
-# Artifactory CIFS/SMB network backup
+# Artifactory CIFS/SMB network backup solution
 
 [![Build Status](https://travis-ci.org/baxeno/artifactory-network-backup.svg?branch=master)](https://travis-ci.org/baxeno/artifactory-network-backup)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/baxeno/artifactory-network-backup/blob/master/LICENSE)
 
 This tool transfers JFrog Artifactory weekly backup from a Linux environment to a CIFS/SMB network share (Windows environment).
@@ -13,16 +14,19 @@ Artifactory can be configured to automatically cleanup old local backups (daily 
 - Promoted artifacts like Docker, Maven, NuGet, etc.
 - Manually published Maven artifacts using [maven-noci-publiser](https://github.com/baxeno/maven-noci-publisher) as it's a good generic binary container.
 
+:o: Weekly backup for long-term maintenance projects include:
+
+- Cached remote artifacts like RPM, Maven jcenter, Gradle plugins, NuGet, etc.
+
 :heavy_minus_sign: Weekly backup typically exclude:
 
 - Non-promoted builds like Maven SNAPSHOTs, etc.
-- Cached remote artifacts like RPM, Maven jcenter, etc.
 
 **:star: Features :star:**
 
 - Tarball weekly backup. _(makes backup compatible with NTFS)_
 - Mount CIFS/SMB network share. _(does not use `/etc/fstab`)_
-- Idempotent backup. _(nothing will happen if called repeatedly)_
+- Idempotent backup and restore. _(nothing will happen if called repeatedly)_
 - Abort if Aritfactory is creating weekly backup files. _(daily backup can run simultaneous)_
 - Support different version of Windows. _(see `CIFS_VERSION` configuration)_
 - Cleanup old network backups. _(avoid out-of-space on network share)_
@@ -31,10 +35,12 @@ Artifactory can be configured to automatically cleanup old local backups (daily 
 ## :factory: Deploy to production
 
 1. See _Prerequisites_ section.
-1. Clone this repository.
+1. Clone/fork this repository.
 1. Run test script, see _Test_ section.
-1. Create `live-cfg.sh`, see _Configuration paramters_ section.
+1. Create private `live-cfg.sh`, see _Configuration paramters_ section.
 1. Schedule periodic run, see _Setting up cron job_ section
+
+> :information_source: Minimum install requires: `artifact-backup.sh`, `artifact-restore.sh`, `common.sh`, `live-cfg.sh` (modified `template-cfg.sh`).
 
 ## :frog: Prerequisites
 
@@ -108,6 +114,8 @@ _Run daily without log:_
 > :information_source: [crontab guru](https://crontab.guru/) - The quick and simple editor for cron schedule expressions by Cronitor.
 
 ## :construction: Development
+
+What to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 All notable changes to this project will be documented in [CHANGELOG.md](CHANGELOG.md).
 
