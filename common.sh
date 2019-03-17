@@ -8,7 +8,7 @@
 ################################################################################
 # Constants
 
-APP_VERSION="0.2.0"
+APP_VERSION="1.0.0"
 APP_DESC="Transfers an Artifactory weekly backup ${DIRECTION} a CIFS/SMB network share"
 APP_GITHUB="https://github.com/baxeno/artifactory-network-backup"
 TMP_DIR_REGEX='.*/[0-9]\{8\}\.[0-9]\{6\}\.tmp$'
