@@ -9,9 +9,9 @@ before_install:
   - docker pull koalaman/shellcheck:v0.6.0
 
 script:
-  - docker run --workdir=/work --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -a -x /work/scripts/artifact-backup.sh
-  - docker run --workdir=/work --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -x /work/scripts/artifact-restore.sh
-  - docker run --workdir=/work --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -a -x /work/scripts/run_test.sh
+  - docker run --workdir=/work/scripts --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -a -x artifact-backup.sh
+  - docker run --workdir=/work/scripts --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -x artifact-restore.sh
+  - docker run --workdir=/work/scripts --volume $(pwd):/work koalaman/shellcheck:v0.6.0 -a -x ../run_test.sh
   - ./run_test.sh
 
 matrix:
