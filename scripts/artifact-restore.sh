@@ -18,6 +18,7 @@ set -e # Exit script when a statement returns a non-true value
 # Constants
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+TEST_DIR="${SCRIPT_DIR}/../test"
 CFG_FILE="live-cfg.sh"
 DIRECTION="from"
 
@@ -58,9 +59,9 @@ while [[ "$#" -gt 0 ]]; do
   case $1 in
   "-t" | "--test")
     if [[ "$#" -gt 1 ]]; then
-      test_cfg="${SCRIPT_DIR}/test/test-$2-cfg.sh"
+      test_cfg="${TEST_DIR}/test-$2-cfg.sh"
       if [ -s "${test_cfg}" ]; then
-        # shellcheck source=test/test-restore-cfg.sh
+        # shellcheck source=../test/test-restore-cfg.sh
         source "${test_cfg}"
         FULL_REMOTE_DIR="${MOUNT_POINT}/${REMOTE_DIR}"
         TEST=1
