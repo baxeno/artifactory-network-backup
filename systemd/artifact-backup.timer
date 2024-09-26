@@ -1,0 +1,8 @@
+[Unit]
+Description=Timer which starts remote Artifactory backup
+
+[Timer]
+OnCalendar=*-*-* 2:00:00
+
+[Install]
+WantedBy=multi-user.target
